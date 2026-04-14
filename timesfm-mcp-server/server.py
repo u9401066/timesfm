@@ -300,7 +300,7 @@ def check_system(
 
     if torch.cuda.is_available():
       gpu_available = True
-      vram_gb = torch.cuda.get_device_properties(0).total_mem / (1024**3)
+      vram_gb = torch.cuda.get_device_properties(0).total_memory / (1024**3)
       result["mode"] = "gpu"
     elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
       gpu_available = True
@@ -350,11 +350,15 @@ def check_system(
     result["passed"] = False
 
   # --- Memory estimate ---
+  # Formula from SKILL.md:
+  #   RAM ≈ 0.8 GB (model) + 0.5 GB (overhead)
+  #       + (0.2 MB × num_series × context_length / 1000)
+  # batch_gb accounts for per-batch activation memory.
   if num_series > 0:
     model_gb = 0.8
     overhead_gb = 0.5
-    data_gb = 0.2 * num_series * context_length / 1_000_000
-    batch_gb = 0.1 * batch_size * (context_length + horizon) / 1_000_000
+    data_gb = 0.2e-3 * num_series * context_length / 1_000  # 0.2 MB per 1k points
+    batch_gb = 0.1e-3 * batch_size * (context_length + horizon) / 1_000
     total_gb = model_gb + overhead_gb + data_gb + batch_gb
     fits = total_gb < ram_gb
     result["memory_estimate"] = {
