@@ -1,0 +1,21 @@
+[project]
+name = "timesfm-mcp-server"
+version = "0.1.0"
+description = "MCP server that exposes TimesFM time-series forecasting as agent-callable tools."
+license = {text = "Apache-2.0"}
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "mcp>=1.0.0",
+    "numpy>=1.26.4",
+    "timesfm",
+    "torch>=2.0.0",
+]
+
+[project.optional-dependencies]
+xreg = [
+    "timesfm[xreg]",
+]
+
+[project.scripts]
+timesfm-mcp-server = "server:main"
